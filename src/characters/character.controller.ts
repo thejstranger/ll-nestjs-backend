@@ -1,6 +1,6 @@
 import { Controller, Get, Query, Post, Body } from '@nestjs/common';
-import { CreateCharDto } from './dto/create-char.dto';
-import { CharService } from './char.service';
+import { CreateCharDto } from './dto/create.character.dto';
+import { CharService } from './character.service';
 import { Character } from './interfaces/character.interface';
 
 @Controller()
