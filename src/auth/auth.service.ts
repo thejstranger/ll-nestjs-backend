@@ -1,28 +1,32 @@
-import { Injectable } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
-import { JwtService } from '@nestjs/jwt';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { sign } from 'jsonwebtoken';
+
+export enum Provider {
+  GOOGLE = 'google',
+}
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly jwtService: JwtService,
-  ) {}
+  private readonly JWT_SECRET_KEY = '1MMJjpHnjqeH2zN1_3Vnfv9n';
 
-  async validateUser(username: string, pass: string): Promise<any> {
-    const user = await this.usersService.findOne(username);
+  constructor(/*private readonly userService: UserService*/) {}
 
-    if (user && user.password === pass) {
-      const { password, ...result } = user;
-      return result;
+  async validateOAuthLogin(
+    thirdPartyId: string,
+    provider: Provider,
+  ): Promise<string> {
+    try {
+      const payload = {
+        thirdPartyId,
+        provider,
+      };
+
+      const jwt: string = sign(payload, this.JWT_SECRET_KEY, {
+        expiresIn: 3600,
+      });
+      return jwt;
+    } catch (err) {
+      throw new InternalServerErrorException('validateOAuthLogin', err.message);
     }
-    return null;
-  }
-
-  async login(user: any) {
-    const payload = { username: user.username, sub: user.userId };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
   }
 }
