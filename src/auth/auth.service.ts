@@ -9,7 +9,7 @@ export enum Provider {
 export class AuthService {
   private readonly JWT_SECRET_KEY = '1MMJjpHnjqeH2zN1_3Vnfv9n';
 
-  constructor(/*private readonly userService: UserService*/) {}
+  constructor() {}
 
   async validateOAuthLogin(
     thirdPartyId: string,
