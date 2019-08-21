@@ -3,6 +3,7 @@ import { sign } from 'jsonwebtoken';
 
 export enum Provider {
   GOOGLE = 'google',
+  AZURE = 'azure',
 }
 
 @Injectable()
@@ -28,5 +29,17 @@ export class AuthService {
     } catch (err) {
       throw new InternalServerErrorException('validateOAuthLogin', err.message);
     }
+  }
+
+  async validateOIDCLogin(
+    thirdPartyId: string,
+    provider: Provider,
+  ): Promise<string> {
+    const payload = {
+      thirdPartyId,
+      provider,
+    };
+    const jwt: string = sign(payload, this.JWT_SECRET_KEY);
+    return jwt;
   }
 }
