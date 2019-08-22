@@ -4,6 +4,7 @@ import { OIDCStrategy } from 'passport-azure-ad';
 import { AuthService, Provider } from './auth.service';
 import { UsersModule } from 'src/users/users.module';
 
+var graph = require('@microsoft/microsoft-graph-client');
 var users = {};
 
 @Injectable()
@@ -19,13 +20,14 @@ export class AzureStrategy extends PassportStrategy(OIDCStrategy, 'azure') {
       passReqToCallback: false,
       responseType: 'code id_token',
       responseMode: 'form_post',
-      scope: ['email', 'profile'],
+      scope: ['profile', 'offline_access', 'user.read', 'calendars.read'],
     });
   }
 
-  async validate(profile, done: Function) {
+  async validate(profile, done) {
     try {
       console.log(profile);
+      console.log(profile.oid);
       if (!profile.oid) {
         return done(new Error('No Oid Found'), null);
       }
@@ -39,10 +41,26 @@ export class AzureStrategy extends PassportStrategy(OIDCStrategy, 'azure') {
       };
 
       console.log(user);
+      console.log(profile._json.aio);
 
-      done(null, user);
+      const client = getAuthenticatedClient(access_token);
+      const te = await client.api('/me').get();
+      console.log(te);
+
+      console.log(profile);
+
+      return done(null, user);
     } catch (err) {
-      done(err, false);
+      return done(err, false);
     }
   }
+}
+
+function getAuthenticatedClient(accessToken) {
+  const client = graph.Client.init({
+    authProvider: done => {
+      done(null, accessToken);
+    },
+  });
+  return client;
 }
